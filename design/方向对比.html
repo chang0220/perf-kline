@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>风格方向对比</title>
+<style>
+/* 三个方向共用同一套布局和示意数据，只换主题变量。用 #a / #b / #c 切换。 */
+:root, .a {
+  --page: #000;
+  --bg: #000; --panel: #000; --panel2: #0c0c0c; --line: #3a1212; --line2: #1d0909;
+  --text: #d6d6d6; --muted: #808080; --name: #e8c547; --accent: #e8c547; --accent-ink: #000;
+  --up: #ff3d3d; --down: #2fd3c6; --up-fill: transparent; --down-fill: #2fd3c6;
+  --ma5: #e6e6e6; --ma10: #e8c547; --ma20: #d05ee0;
+  --sel: #10203a; --tag: #1a1a1a;
+  --num: "SF Mono", Menlo, monospace;
+  --ui: "PingFang SC", -apple-system, sans-serif;
+  --radius: 0px; --tl: #3a3a3a;
+  --menubar: #1e1e1e; --menubar-text: #f0f0f0;
+}
+.b {
+  --page: #141415;
+  --bg: #1c1c1e; --panel: #1c1c1e; --panel2: #232326; --line: #313134; --line2: #262629;
+  --text: #ebe9e4; --muted: #8e8c87; --name: #ebe9e4; --accent: #d6a24a; --accent-ink: #1c1c1e;
+  --up: #e5544b; --down: #3fae74; --up-fill: #e5544b; --down-fill: #3fae74;
+  --ma5: #ebe9e4; --ma10: #d6a24a; --ma20: #8f8bd6;
+  --sel: #2c2c30; --tag: #2a2a2d;
+  --num: -apple-system, "SF Pro Text", sans-serif;
+  --ui: -apple-system, "PingFang SC", sans-serif;
+  --radius: 6px; --tl: #48484c;
+  --menubar: #2a2a2c; --menubar-text: #f2f2f2;
+}
+.c {
+  --page: #dcdcda;
+  --bg: #f6f6f4; --panel: #ffffff; --panel2: #f6f6f4; --line: #e3e2de; --line2: #eeede9;
+  --text: #1d1d1f; --muted: #86857f; --name: #1d1d1f; --accent: #1d1d1f; --accent-ink: #fff;
+  --up: #d63a31; --down: #1e9659; --up-fill: #d63a31; --down-fill: #1e9659;
+  --ma5: #1d1d1f; --ma10: #c98a1b; --ma20: #6f6ac9;
+  --sel: #efeeea; --tag: #f0efeb;
+  --num: -apple-system, "SF Pro Text", sans-serif;
+  --ui: -apple-system, "PingFang SC", sans-serif;
+  --radius: 6px; --tl: #d0d0cc;
+  --menubar: #ececea; --menubar-text: #1d1d1f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); font-family: var(--ui); color: var(--text); width: 1440px; }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }
+.up { color: var(--up); } .down { color: var(--down); } .muted { color: var(--muted); }
+
+/* 菜单栏示意 */
+.menubar { height: 28px; background: var(--menubar); color: var(--menubar-text); display: flex; justify-content: flex-end; align-items: center; gap: 18px; padding: 0 14px; font-size: 13px; font-family: -apple-system, "PingFang SC", sans-serif; }
+.mb-item { display: flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 5px; background: rgba(127,127,127,.18); }
+.mb-item svg { display: block; }
+.mb-dim { opacity: .55; }
+
+.win { width: 1440px; height: 900px; background: var(--bg); display: grid; grid-template-rows: 38px 78px 1fr 28px; overflow: hidden; }
+.titlebar { display: flex; align-items: center; gap: 14px; padding: 0 14px; border-bottom: 1px solid var(--line); background: var(--panel); }
+.tl { display: flex; gap: 8px; margin-right: 10px; } .tl i { width: 12px; height: 12px; border-radius: 50%; background: var(--tl); display: block; }
+.brand { font-weight: 700; font-size: 14px; letter-spacing: .5px; }
+.brand small { font-weight: 400; color: var(--muted); margin-left: 8px; font-size: 12px; }
+.live { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.live b { width: 6px; height: 6px; border-radius: 50%; background: var(--up); display: block; }
+.seg { display: flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.seg span { font-size: 12px; padding: 3px 10px; color: var(--muted); }
+.seg span.on { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.sp { flex: 1; }
+.tbtn { font-size: 12px; padding: 3px 10px; border: 1px solid var(--line); border-radius: var(--radius); color: var(--muted); }
+.clock { font-size: 15px; font-weight: 600; }
+
+.indices { display: grid; grid-template-columns: repeat(6, 1fr); border-bottom: 1px solid var(--line); }
+.idx { padding: 10px 14px; border-right: 1px solid var(--line2); display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto auto; column-gap: 8px; }
+.idx.on { background: var(--sel); }
+.idx .t { font-size: 12px; color: var(--muted); grid-column: 1; }
+.idx .v { font-size: 21px; font-weight: 700; grid-column: 1; line-height: 1.15; }
+.idx .v small { font-size: 12px; font-weight: 400; color: var(--muted); margin-left: 2px; }
+.idx .d { font-size: 12px; grid-column: 1; }
+.idx svg { grid-column: 2; grid-row: 1 / 4; justify-self: end; align-self: center; }
+
+.main { display: grid; grid-template-columns: 300px 1fr 320px; min-height: 0; }
+.col { border-right: 1px solid var(--line); min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.col:last-child { border-right: 0; }
+.hd { display: flex; align-items: baseline; gap: 8px; padding: 10px 14px 8px; border-bottom: 1px solid var(--line2); }
+.hd h3 { margin: 0; font-size: 14px; }
+.hd .muted { font-size: 11px; }
+.hd .r { margin-left: auto; font-size: 11px; color: var(--muted); }
+
+.wl-group { font-size: 11px; color: var(--muted); padding: 7px 14px 4px; display: flex; justify-content: space-between; }
+.wl { display: grid; grid-template-columns: 48px minmax(0, 1fr) 44px 44px 50px; align-items: center; padding: 0 14px; height: 29px; font-size: 13px; gap: 4px; }
+.wl.on { background: var(--sel); }
+.wl .code { color: var(--muted); font-size: 11px; }
+.wl .nm { color: var(--name); white-space: nowrap; overflow: hidden; }
+.wl .px { text-align: right; }
+.wl .ch { text-align: right; font-size: 12px; }
+.pending { font-size: 10px; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 3px; margin-left: 4px; }
+
+.qhead { padding: 10px 16px 6px; display: grid; grid-template-columns: auto auto 1fr; column-gap: 18px; align-items: end; border-bottom: 1px solid var(--line2); }
+.qhead .nm { font-size: 17px; font-weight: 700; color: var(--name); }
+.qhead .nm .code { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 6px; }
+.qhead .big { font-size: 36px; font-weight: 700; line-height: 1; }
+.qhead .chg { font-size: 14px; }
+.stats { grid-column: 1 / 4; display: flex; gap: 26px; font-size: 12px; margin-top: 8px; color: var(--muted); }
+.stats b { color: var(--text); font-weight: 500; margin-left: 6px; }
+.periods { justify-self: end; align-self: start; }
+
+.chart { flex: 1; position: relative; }
+
+.rank { display: grid; grid-template-columns: 22px 1fr 50px; align-items: center; gap: 8px; padding: 0 14px; height: 27px; font-size: 13px; position: relative; }
+.rank .bar { position: absolute; right: 0; top: 3px; bottom: 3px; background: var(--up); opacity: .14; }
+.rank .no { font-size: 11px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); }
+.rank .no.top { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+.rank .v { text-align: right; position: relative; }
+.rank .n { position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tape { font-size: 12px; padding: 3px 14px; display: grid; grid-template-columns: 62px 1fr; gap: 6px; line-height: 1.55; }
+.tape .t { color: var(--muted); }
+
+.status { border-top: 1px solid var(--line); display: flex; align-items: center; gap: 18px; padding: 0 14px; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+.status b { color: var(--text); font-weight: 500; }
+.status .ticker { border-left: 1px solid var(--line); padding-left: 14px; display: flex; gap: 22px; }
+</style>
+</head>
+<body>
+<div class="menubar">
+  <span class="mb-item" id="mb"></span>
+  <span class="mb-dim">11月10日 周二 14:32</span>
+</div>
+<div class="win">
+  <div class="titlebar">
+    <div class="tl"><i></i><i></i><i></i></div>
+    <div class="brand">性能行情<small>示意数据</small></div>
+    <div class="live"><b></b>实时采样 1 秒</div>
+    <div class="sp"></div>
+    <span class="muted" style="font-size:12px">采样</span>
+    <div class="seg"><span>0.5秒</span><span class="on">1秒</span><span>2秒</span><span>5秒</span></div>
+    <span class="tbtn">暂停</span><span class="tbtn">置顶</span><span class="tbtn">红涨绿跌</span>
+    <span class="clock num">14:32:07</span>
+  </div>
+  <div class="indices" id="indices"></div>
+  <div class="main">
+    <div class="col">
+      <div class="hd"><h3>自选行情</h3><span class="r">27 项</span></div>
+      <div id="watch"></div>
+    </div>
+    <div class="col">
+      <div class="qhead" id="qhead"></div>
+      <div class="chart" id="chart"></div>
+    </div>
+    <div class="col">
+      <div class="hd"><h3>主力动向</h3><span class="muted">按 CPU 占用</span><span class="r">前 10</span></div>
+      <div id="rank" style="padding:4px 0"></div>
+      <div class="hd" style="border-top:1px solid var(--line)"><h3>逐笔成交</h3><span class="muted">系统事件</span></div>
+      <div id="tape" style="padding:4px 0"></div>
+    </div>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+const theme = (location.hash || '#b').slice(1);
+document.body.className = theme;
+const css = (v) => getComputedStyle(document.body).getPropertyValue(v).trim();
+const hollowUp = theme === 'a';
+
+// 固定种子的随机数，保证三个方向数据完全一样
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// 模拟 1 秒一个采样点，再按 n 个点聚合成一根 K 线（开 / 高 / 低 / 收）
+function candles(seed, { base, vol, spike = 0.01, burstP = 0.01, burst = 0, lo = 0, hi = 100, count = 100, per = 5 }) {
+  // 平时围着 base 小幅波动；偶尔进入一段“高负载”（target 抬高一段时间），更像真实占用
+  const r = rng(seed);
+  let x = base, target = base, left = 0; const out = [];
+  for (let w = 0; w < 300; w++) { if (left > 0) left--; else if (r() < burstP) { left = 12 + r() * 40; target = base + burst * (0.5 + r()); } if (left === 0) target = base; x += (target - x) * 0.15 + (r() - 0.5) * vol; } // 预热，避免第一根从 base 硬跳
+  for (let i = 0; i < count; i++) {
+    const pts = [];
+    for (let k = 0; k < per; k++) {
+      if (left > 0) left--; else if (r() < burstP) { left = 12 + r() * 40; target = base + burst * (0.5 + r()); }
+      if (left === 0) target = base;
+      x += (target - x) * 0.15 + (r() - 0.5) * vol;
+      let y = x + (r() < spike ? r() * vol * 3 : 0);
+      y = Math.max(lo, Math.min(hi, y));
+      pts.push(y);
+    }
+    const h = Math.max(...pts), l = Math.min(...pts);
+    out.push({ o: pts[0], h, l, c: pts[pts.length - 1], v: 3000 + r() * 2500 + (h - l) * 300 + Math.max(0, pts[0] - base) * 120 });
+  }
+  return out;
+}
+
+function miniSVG(cs, w, h) {
+  const max = Math.max(...cs.map((c) => c.h)), min = Math.min(...cs.map((c) => c.l));
+  const y = (v) => h - 2 - ((v - min) / (max - min || 1)) * (h - 4);
+  const step = w / cs.length; let s = '';
+  cs.forEach((c, i) => {
+    const up = c.c >= c.o, col = up ? css('--up') : css('--down');
+    const x = i * step + step / 2;
+    const top = y(Math.max(c.o, c.c)), bh = Math.max(1, Math.abs(y(c.o) - y(c.c)));
+    s += `<line x1="${x}" x2="${x}" y1="${y(c.h)}" y2="${y(c.l)}" stroke="${col}" stroke-width="1"/>`;
+    const bw = Math.max(1.5, step * 0.62);
+    s += `<rect x="${x - bw / 2}" y="${top}" width="${bw}" height="${bh}" fill="${up && hollowUp ? css('--bg') : col}" stroke="${col}" stroke-width="${up && hollowUp ? 1 : 0}"/>`;
+  });
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${s}</svg>`;
+}
+
+const fmt = (v, d = 1) => v.toFixed(d);
+const sign = (v, d = 1, u = '') => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d) + u;
+const cls = (v) => (v > 0 ? 'up' : v < 0 ? 'down' : 'muted');
+
+// ---------- 指标 ----------
+const M = {
+  cpu: { name: 'CPU 占用', code: '600001', unit: '%', d: 1, cs: candles(7, { base: 17, vol: 4, burstP: 0.012, burst: 22, spike: 0.02 }) },
+  gpu: { name: 'GPU 占用', code: '600002', unit: '%', d: 1, cs: candles(11, { base: 28, vol: 3, burstP: 0.01, burst: 18 }) },
+  mem: { name: '内存占用', code: '600003', unit: '%', d: 1, cs: candles(13, { base: 63, vol: 0.35, burstP: 0.005, burst: 3 }) },
+  tmp: { name: 'CPU 温度', code: '600011', unit: '°C', d: 0, cs: candles(17, { base: 51, vol: 0.6, burstP: 0.012, burst: 7, spike: 0 }) },
+  net: { name: '网络下行', code: '600021', unit: 'MB/s', d: 2, cs: candles(19, { base: 1.4, vol: 0.5, burstP: 0.02, burst: 5, lo: 0.05, hi: 40 }) },
+  prc: { name: '进程数', code: '600031', unit: '', d: 0, cs: candles(23, { base: 512, vol: 1.2, burstP: 0.01, burst: 6, spike: 0, lo: 480, hi: 560 }) },
+};
+for (const k in M) { const m = M[k]; m.last = m.cs[m.cs.length - 1].c; m.open = m.cs[0].o; m.chg = m.last - m.open; }
+
+document.getElementById('indices').innerHTML = ['cpu', 'gpu', 'mem', 'tmp', 'net', 'prc'].map((k) => {
+  const m = M[k];
+  return `<div class="idx ${k === 'cpu' ? 'on' : ''}"><span class="t">${m.name}</span>
+    <span class="v num ${cls(m.chg)}">${fmt(m.last, m.d)}<small>${m.unit}</small></span>
+    <span class="d num ${cls(m.chg)}">${sign(m.chg, m.d, m.unit === '%' ? 'pt' : m.unit)}</span>
+    ${miniSVG(m.cs.slice(-18), 92, 46)}</div>`;
+}).join('');
+
+// 自选：大盘 / 处理器（M4 Pro：10 个性能核 + 4 个能效核）/ 温度功耗 / 网络磁盘
+const groups = [
+  ['大盘', [['600001', 'CPU 占用', M.cpu], ['600002', 'GPU 占用', M.gpu], ['600003', '内存占用', M.mem]]],
+  ['处理器 · 逐核占用', Array.from({ length: 8 }, (_, i) => {
+    const cs = candles(100 + i, { base: 8 + (i % 4) * 5, vol: 6, burstP: 0.015, burst: 28, spike: 0.02 });
+    const last = cs[cs.length - 1].c;
+    return [String(600101 + i), (i < 6 ? '性能核 ' : '能效核 ') + (i < 6 ? i + 1 : i - 5), { cs, last, chg: last - cs[0].o, d: 1, unit: '%' }];
+  })],
+  ['温度 · 功耗', [['600011', 'CPU 温度', M.tmp, true], ['600012', '整机功耗', { cs: candles(31, { base: 16, vol: 1.2, burstP: 0.012, burst: 14 }), d: 1, unit: 'W' }, true]]],
+  ['网络 · 磁盘', [['600021', '网络下行', M.net], ['600022', '磁盘读取', { cs: candles(37, { base: 2.5, vol: 1, burstP: 0.015, burst: 12, lo: 0.05, hi: 80 }), d: 1, unit: 'MB/s' }]]],
+];
+let wl = '';
+for (const [g, rows] of groups) {
+  wl += `<div class="wl-group"><span>${g}${rows.some((r) => r[3]) ? '　<span style="opacity:.8">* 能否读到待验证</span>' : ''}</span><span>${rows.length}</span></div>`;
+  for (const [code, nm, m, pend] of rows) {
+    if (m.last === undefined) { m.last = m.cs[m.cs.length - 1].c; m.chg = m.last - m.cs[0].o; }
+    wl += `<div class="wl ${code === '600001' ? 'on' : ''}"><span class="code num">${code}</span>
+      <span class="nm">${nm}${pend ? '<sup class="muted">*</sup>' : ''}</span>
+      ${miniSVG(m.cs.slice(-12), 44, 18)}
+      <span class="px num ${cls(m.chg)}">${fmt(m.last, m.d)}</span>
+      <span class="ch num ${cls(m.chg)}">${sign(m.chg, m.d)}</span></div>`;
+  }
+}
+document.getElementById('watch').innerHTML = wl;
+
+// 品种头
+{
+  const m = M.cpu, hi = Math.max(...m.cs.map((c) => c.h)), lo = Math.min(...m.cs.map((c) => c.l));
+  const avg = m.cs.reduce((a, c) => a + c.c, 0) / m.cs.length;
+  document.getElementById('qhead').innerHTML = `
+    <div class="nm">CPU 占用<span class="code num">600001</span></div>
+    <div><span class="big num ${cls(m.chg)}">${fmt(m.last)}</span><span class="muted" style="font-size:14px"> %</span>
+      <span class="chg num ${cls(m.chg)}" style="margin-left:10px">${sign(m.chg, 1, 'pt')}　${sign((m.chg / m.open) * 100, 2, '%')}</span></div>
+    <div class="seg periods"><span>2秒K</span><span class="on">5秒K</span><span>10秒K</span><span>30秒K</span><span>1分K</span></div>
+    <div class="stats"><span>今开<b class="num">${fmt(m.open)}</b></span><span>最高<b class="num up">${fmt(hi)}</b></span><span>最低<b class="num down">${fmt(lo)}</b></span><span>均值<b class="num">${fmt(avg)}</b></span><span>振幅<b class="num">${fmt(hi - lo)}pt</b></span><span>成交量<b class="num">上下文切换 / 秒</b></span></div>`;
+}
+
+// 主图：K 线 + MA5/10/20 + 成交量
+{
+  const box = document.getElementById('chart');
+  const W = box.clientWidth, H = box.clientHeight;
+  const cs = M.cpu.cs;
+  const padL = 10, padR = 58, top = 26, mainH = H * 0.7, volTop = top + mainH + 26, volH = H - volTop - 24;
+  const pw = W - padL - padR, step = pw / cs.length;
+  const max = Math.max(...cs.map((c) => c.h)) * 1.04, min = Math.max(0, Math.min(...cs.map((c) => c.l)) * 0.9);
+  const y = (v) => top + mainH - ((v - min) / (max - min)) * mainH;
+  const vmax = Math.max(...cs.map((c) => c.v));
+  const grid = css('--line2'), muted = css('--muted');
+  let s = '';
+  for (let k = 0; k <= 4; k++) {
+    const v = min + ((max - min) * k) / 4, yy = y(v);
+    s += `<line x1="${padL}" x2="${W - padR}" y1="${yy}" y2="${yy}" stroke="${grid}" ${theme === 'a' ? 'stroke-dasharray="2 3"' : ''}/>`;
+    s += `<text x="${W - padR + 8}" y="${yy + 4}" fill="${muted}" font-size="11" font-family="${css('--num')}">${v.toFixed(1)}</text>`;
+  }
+  const ma = (n) => cs.map((_, i) => (i < n - 1 ? null : cs.slice(i - n + 1, i + 1).reduce((a, c) => a + c.c, 0) / n));
+  cs.forEach((c, i) => {
+    const up = c.c >= c.o, col = up ? css('--up') : css('--down');
+    const x = padL + i * step + step / 2, bw = step * 0.66;
+    const t = y(Math.max(c.o, c.c)), bh = Math.max(1, Math.abs(y(c.o) - y(c.c)));
+    s += `<line x1="${x}" x2="${x}" y1="${y(c.h)}" y2="${y(c.l)}" stroke="${col}"/>`;
+    s += `<rect x="${x - bw / 2}" y="${t}" width="${bw}" height="${bh}" fill="${up && hollowUp ? css('--bg') : col}" stroke="${col}" stroke-width="${up && hollowUp ? 1 : 0}"/>`;
+    const vh = (c.v / vmax) * volH;
+    s += `<rect x="${x - bw / 2}" y="${volTop + volH - vh}" width="${bw}" height="${vh}" fill="${up && hollowUp ? css('--bg') : col}" stroke="${col}" stroke-width="${up && hollowUp ? 1 : 0}" opacity="${theme === 'a' ? 1 : 0.55}"/>`;
+  });
+  const legend = [];
+  for (const [n, v] of [[5, '--ma5'], [10, '--ma10'], [20, '--ma20']]) {
+    const pts = ma(n).map((m, i) => (m === null ? null : `${padL + i * step + step / 2},${y(m)}`)).filter(Boolean).join(' ');
+    s += `<polyline points="${pts}" fill="none" stroke="${css(v)}" stroke-width="1.2"/>`;
+    legend.push(`<tspan fill="${css(v)}">MA${n} ${ma(n).at(-1).toFixed(1)}</tspan>`);
+  }
+  s += `<text x="${padL + 4}" y="16" font-size="12" font-family="${css('--num')}">${legend.join('<tspan>　</tspan>')}</text>`;
+  // 最新价标签
+  const last = cs.at(-1).c, ly = y(last), lc = last >= cs.at(-1).o ? css('--up') : css('--down');
+  s += `<line x1="${padL}" x2="${W - padR}" y1="${ly}" y2="${ly}" stroke="${lc}" stroke-dasharray="3 3" opacity=".7"/>`;
+  s += `<rect x="${W - padR + 2}" y="${ly - 9}" width="${padR - 6}" height="18" fill="${lc}" rx="${theme === 'a' ? 0 : 3}"/>`;
+  s += `<text x="${W - padR + 8}" y="${ly + 4}" font-size="11" font-weight="700" fill="${theme === 'a' ? '#000' : '#fff'}" font-family="${css('--num')}">${last.toFixed(1)}</text>`;
+  // 十字光标示意
+  const ci = 71, cx = padL + ci * step + step / 2, cc = cs[ci];
+  s += `<line x1="${cx}" x2="${cx}" y1="${top}" y2="${volTop + volH}" stroke="${muted}" stroke-width=".8" stroke-dasharray="2 2"/>`;
+  s += `<line x1="${padL}" x2="${W - padR}" y1="${y(cc.c)}" y2="${y(cc.c)}" stroke="${muted}" stroke-width=".8" stroke-dasharray="2 2"/>`;
+  const tipX = cx + 12, tipY = top + 10;
+  s += `<rect x="${tipX}" y="${tipY}" width="128" height="92" fill="${css('--panel2')}" stroke="${css('--line')}" rx="${theme === 'a' ? 0 : 5}"/>`;
+  const rows = [['时间', '14:30:42'], ['开', cc.o.toFixed(1)], ['高', cc.h.toFixed(1)], ['低', cc.l.toFixed(1)], ['收', cc.c.toFixed(1)]];
+  rows.forEach(([k, v], j) => {
+    s += `<text x="${tipX + 10}" y="${tipY + 18 + j * 16}" font-size="11" fill="${muted}">${k}</text>`;
+    s += `<text x="${tipX + 118}" y="${tipY + 18 + j * 16}" font-size="11" text-anchor="end" fill="${css('--text')}" font-family="${css('--num')}">${v}</text>`;
+  });
+  s += `<text x="${padL + 4}" y="${volTop - 8}" font-size="11" fill="${muted}">成交量（上下文切换）</text>`;
+  ['14:23:47', '14:25:27', '14:27:07', '14:28:47', '14:30:27'].forEach((t, k) => {
+    s += `<text x="${padL + (k + 0.5) * (pw / 5)}" y="${H - 6}" font-size="11" text-anchor="middle" fill="${muted}" font-family="${css('--num')}">${t}</text>`;
+  });
+  box.innerHTML = `<svg width="${W}" height="${H}">${s}</svg>`;
+}
+
+// 主力动向
+const procs = [['WindowServer', 14.2], ['Claude', 9.8], ['Google Chrome Helper', 6.1], ['iTerm2', 4.4], ['kernel_task', 3.9], ['Music', 2.7], ['mds_stores', 1.8], ['Finder', 0.9], ['corespotlightd', 0.6], ['coreaudiod', 0.4]];
+document.getElementById('rank').innerHTML = procs.map(([n, v], i) =>
+  `<div class="rank"><span class="bar" style="width:${(v / procs[0][1]) * 62}%"></span><span class="no num ${i < 3 ? 'top' : ''}">${i + 1}</span><span class="n">${n}</span><span class="v num up">${v.toFixed(1)}%</span></div>`).join('');
+
+const tape = [
+  ['14:32:07', '<span class="up">GPU 占用拉升 +12.4pt → 41.2%</span>'],
+  ['14:32:06', 'Claude 9.8% <span class="up">▲2.1</span>'],
+  ['14:32:05', '<span class="muted">新进</span> mdworker_shared · 8812'],
+  ['14:32:04', 'Google Chrome Helper 6.1% <span class="down">▼1.4</span>'],
+  ['14:32:03', '<span class="down">CPU 温度回落 −2°C → 52°C</span>'],
+  ['14:32:02', '<span class="muted">退出</span> mdworker_shared · 8790'],
+  ['14:32:01', 'WindowServer 14.2% <span class="up">▲0.6</span>'],
+  ['14:32:00', '<span class="up">网络下行放量 +3.1 → 4.3 MB/s</span>'],
+  ['14:31:59', 'iTerm2 4.4% <span class="down">▼0.3</span>'],
+];
+document.getElementById('tape').innerHTML = tape.map(([t, x]) => `<div class="tape"><span class="t num">${t}</span><span>${x}</span></div>`).join('');
+
+document.getElementById('status').innerHTML = `<span>采样 <b>1 秒</b></span><span>运行 <b class="num">00:14:52</b></span><span>进程 <b class="num">512</b></span><span>线程 <b class="num">3,284</b></span>
+  <span class="ticker"><span>内存占用 <span class="num ${cls(M.mem.chg)}">${fmt(M.mem.last)}% ${sign(M.mem.chg, 1, 'pt')}</span></span><span>网络下行 <span class="num up">4.3 MB/s ▲</span></span><span>磁盘读取 <span class="num down">2.1 MB/s ▼</span></span><span>CPU 温度 <span class="num down">52°C ▼</span></span></span>`;
+
+// 菜单栏小行情
+{
+  const m = M.cpu;
+  document.getElementById('mb').innerHTML = `${miniSVG(m.cs.slice(-12), 40, 16)}<span class="num">CPU ${fmt(m.last)}%</span><span class="num ${cls(m.chg)}" style="font-size:11px">${sign(m.chg, 1)}</span>`;
+}
+</script>
+</body>
+</html>
