@@ -1,6 +1,6 @@
 #!/bin/zsh
 # 编译并打包成 dist/性能行情.app（本机自签名，不上架）。
-# 用法：scripts/build-app.sh [--install]   加 --install 会再复制到 ~/code/_交付/perf-kline/
+# 用法：scripts/build-app.sh [目录]   给了目录就把打包好的 App 再复制一份过去
 set -euo pipefail
 cd "$(dirname "$0")/.."
 VERSION=0.1.0
@@ -30,10 +30,10 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 PLIST
 codesign --force --sign - "$APP"
 echo "已打包：$APP"
-if [[ "${1:-}" == "--install" ]]; then
-  DEST="$HOME/code/_交付/perf-kline"
+if [[ -n "${1:-}" ]]; then
+  DEST="$1"
   mkdir -p "$DEST"
-  rm -rf "$DEST/性能行情.app"
+  rm -rf "${DEST:?}/性能行情.app"
   cp -R "$APP" "$DEST/"
   echo "已复制到：$DEST/性能行情.app"
 fi

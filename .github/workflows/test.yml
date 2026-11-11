@@ -4,6 +4,7 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: macos-15
+    # 只跑单元测试和编译；采样读数依赖真机硬件，不在云端验证
     steps:
       - uses: actions/checkout@v4
       - run: swift test
