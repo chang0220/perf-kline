@@ -34,6 +34,17 @@ struct CandleTests {
         #expect(s.candles(period: 5, maxCount: 2).map(\.start) == [20, 40])
     }
 
+    @Test("maxCount 传 Int.max 表示全部，不能崩（2026-11-10 滚轮崩溃的复现）；根数统计与实际生成一致")
+    func unlimited() {
+        let s = Series(capacity: 1000)
+        for t in [0.0, 1, 2, 20, 21, 40, 41.5] { s.append(time: t, value: t, count: nil) }
+        let all = s.candles(period: 5, maxCount: Int.max)
+        #expect(all.map(\.start) == [0, 20, 40])
+        #expect(s.candleCount(period: 5) == all.count)
+        #expect(s.candleCount(period: 1) == s.candles(period: 1, maxCount: Int.max).count)
+        #expect(Series(capacity: 10).candleCount(period: 5) == 0)
+    }
+
     @Test("时间不递增的点被丢弃；超容量会删掉最旧的点")
     func capacity() {
         let s = Series(capacity: 100)

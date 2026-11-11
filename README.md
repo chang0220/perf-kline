@@ -20,7 +20,8 @@
   - 要压到 3% 以下得换渲染方式（例如 K 线主图和小 K 线改用 CALayer 直接画），是较大改动，没在这一轮做，等用户决定要不要。
   - 另外 `ps` 子进程每 2 秒一次、每次约 26 毫秒，约合 1% 单核，算在 `ps` 进程头上。
 - 自动测试配置 `.github/workflows/test.yml` 只是写好了，仓库还没推到 GitHub，没在云端跑过。
-- **没验证过的**：键盘操作、滚轮 / 触控板缩放和平移、置顶、菜单栏下拉菜单的实际点击（都需要人在屏幕前操作，这一轮是熄屏 / 离屏截图验证的）。
+- 2026-11-10 用户试用时崩溃一次（崩溃报告 `~/Library/Logs/DiagnosticReports/PerfKline-2026-11-10-202445.ips`）：在 K 线图上滚动滚轮必崩。原因是滚动范围检查用 `candles(maxCount: Int.max)` 取全部 K 线，函数里按 maxCount 预留内存，申请约 1.8×10¹⁹ 字节失败。已修（预留不超过采样数；滚动检查改用只计数的 `candleCount`），加了回归测试（撤掉修复时该测试以同样方式崩溃，确认测得到）；并用 `--scroll-test` 在真实 App 里把滚轮事件交给 K 线图交互层，缩放 3–40 和往回翻的限位（历史 28 根、屏幕 18 根 → 最多翻 10 根）都符合预期。
+- **没验证过的**：键盘操作、触控板双指捏合 / 按住拖动、置顶、菜单栏下拉菜单的实际点击（需要人在屏幕前操作）。滚轮缩放和左右平移已在真实 App 里用合成事件验证过。
 
 ## 怎么用
 
@@ -36,12 +37,13 @@
 ## 构建与测试
 
 ```sh
-swift test                      # 12 项单元测试（K 线聚合、均线、ps 解析、格式、事件规则等）
+swift test                      # 13 项单元测试（K 线聚合、均线、ps 解析、格式、事件规则等）
 scripts/build-app.sh            # 打包到 dist/性能行情.app
 scripts/build-app.sh --install  # 再复制到 ~/code/_交付/perf-kline/
 .build/release/PerfKline --selftest 10   # 每秒打印一行原始读数，用来和 top / netstat / iostat 对照
 .build/release/PerfKline --snapshot 图.png --after 60 --appearance dark --hover 150,250   # 离屏截图（不需要录屏权限）
 .build/release/PerfKline --snapshot 图.png --after 50 --threads --real-visibility [--close-window]   # 按线程统计 App 自身 CPU
+.build/release/PerfKline --snapshot 图.png --after 60 --scroll-test   # 向 K 线图发滚轮事件，检查缩放和翻历史的限位
 ```
 
 代码结构：`Sources/KlineCore`（采样、K 线聚合、事件，带测试）+ `Sources/PerfKline`（界面）。

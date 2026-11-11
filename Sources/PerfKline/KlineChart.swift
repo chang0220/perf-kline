@@ -36,7 +36,7 @@ extension Store {
     func clampScroll(width: CGFloat) {
         let pw = max(50, width - ChartLayout.padL - ChartLayout.padR)
         let n = max(5, Int(pw / chartStep))
-        let total = series[selected]?.candles(period: period, maxCount: Int.max).count ?? 0
+        let total = series[selected]?.candleCount(period: period) ?? 0
         chartScrollBack = min(max(0, chartScrollBack), Double(max(0, total - n)))
     }
 }

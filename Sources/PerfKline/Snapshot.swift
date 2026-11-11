@@ -21,6 +21,34 @@ enum Snapshot {
                 if xy.count == 2 { delegate.store.debugHover = CGPoint(x: xy[0], y: xy[1]) }
             }
         }
+        // --scroll-test：截图前 5 秒向 K 线图发一串真实的滚轮事件（上下 = 缩放，左右 = 翻历史），走和手动滚动相同的路径
+        if args.contains("--scroll-test") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + max(1, after - 5)) {
+                let w = delegate.window!
+                let st = delegate.store
+                print("找到 K 线图交互层：\(findChart(w.contentView) != nil)")
+                print(String(format: "滚动前：K 线宽 %.1f，往回翻 %.1f 根", st.chartStep, st.chartScrollBack))
+                // 窗口坐标里 K 线图大致在正中偏下
+                let pInWin = NSPoint(x: w.frame.width / 2, y: w.frame.height * 0.4)
+                let pScreen = w.convertPoint(toScreen: pInWin)
+                let cgY = (NSScreen.screens.first?.frame.height ?? 0) - pScreen.y
+                @MainActor func send(_ dy: Int32, _ dx: Int32) {
+                    guard let e = CGEvent(scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 2, wheel1: dy, wheel2: dx, wheel3: 0) else { return }
+                    e.location = CGPoint(x: pScreen.x, y: cgY)
+                    if let ne = NSEvent(cgEvent: e), let v = findChart(w.contentView) { v.scrollWheel(with: ne) }
+                }
+                for _ in 0..<40 { send(-30, 0) }      // 缩小到最小
+                print(String(format: "缩到最小：K 线宽 %.1f", st.chartStep))
+                for _ in 0..<60 { send(30, 0) }       // 放大到最大，这时历史比屏幕宽，才有得翻
+                let total = st.series[st.selected]?.candleCount(period: st.period) ?? 0
+                print(String(format: "放到最大：K 线宽 %.1f；历史共 %d 根", st.chartStep, total))
+                for _ in 0..<30 { send(0, 500) }      // 往回翻很多（超出历史，应被限住）
+                print(String(format: "滚动后：K 线宽 %.1f（范围 %.0f–%.0f），往回翻 %.1f 根", st.chartStep, ChartLayout.minStep, ChartLayout.maxStep, st.chartScrollBack))
+                for _ in 0..<30 { send(0, -500) }     // 翻回最新
+                print(String(format: "翻回后：往回翻 %.1f 根", st.chartScrollBack))
+            }
+        }
+
         // 截图前 30 秒到截图时，按线程统计本进程的 CPU 时间（诊断 App 自身开销用）
         var before: [UInt64: (String, Double)] = [:]
         DispatchQueue.main.asyncAfter(deadline: .now() + max(0.5, after - 30)) { before = threadTimes() }
@@ -80,4 +108,13 @@ func threadTimes() -> [UInt64: (String, Double)] {
     }
     vm_deallocate(mach_task_self_, vm_address_t(bitPattern: list), vm_size_t(Int(count) * MemoryLayout<thread_act_t>.stride))
     return out
+}
+
+/// 在视图树里找 K 线图的交互层（滚轮事件最终就是交给它处理的）。
+@MainActor
+func findChart(_ v: NSView?) -> ChartInteraction.V? {
+    guard let v else { return nil }
+    if let c = v as? ChartInteraction.V { return c }
+    for s in v.subviews { if let c = findChart(s) { return c } }
+    return nil
 }

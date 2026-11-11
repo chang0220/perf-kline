@@ -50,7 +50,8 @@ public final class Series {
         precondition(period > 0)
         guard maxCount > 0, !values.isEmpty else { return [] }
         var out: [Candle] = []
-        out.reserveCapacity(maxCount)
+        // 预留空间不能直接用 maxCount：调用方可能传 Int.max 表示“全部”（2026-11-10 因此崩过一次）。
+        out.reserveCapacity(min(maxCount, values.count))
         var i = values.count - 1
         while i >= 0 && out.count < maxCount {
             let bucket = (times[i] / period).rounded(.down)
@@ -72,6 +73,18 @@ public final class Series {
             i = j
         }
         return out.reversed()
+    }
+
+    /// 按 `period` 秒分桶后一共有多少根 K 线（只数不生成，给滚动范围检查用）。
+    public func candleCount(period: Double) -> Int {
+        precondition(period > 0)
+        var n = 0
+        var last: Double?
+        for t in times {
+            let b = (t / period).rounded(.down)
+            if b != last { n += 1; last = b }
+        }
+        return n
     }
 
     /// 时间 `t` 时（或之前最近一次）的采样值；比最早的采样还早时返回最早的值。
