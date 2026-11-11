@@ -1,0 +1,10 @@
+# 推到 GitHub 后自动跑单元测试（需要苹果芯片的 macOS 机器）。
+name: test
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
+      - run: swift build -c release
