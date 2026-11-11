@@ -15,6 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWind
         buildStatusItem()
         store.onChange = { [weak self] in self?.updateStatusItem() }
         store.onPinChange = { [weak self] on in self?.window.level = on ? .floating : .normal }
+        observeVisibility()
         store.start()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate()
@@ -32,6 +33,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWind
         window.makeKeyAndOrderFront(nil)
         NSApp.activate()
     }
+
+    // MARK: 看不见时不刷新（省 CPU）
+
+    func observeVisibility() {
+        // 启动时屏幕可能已经熄灭或锁屏，此时收不到通知，先主动查一次。
+        let locked = (CGSessionCopyCurrentDictionary() as? [String: Any])?["CGSSessionScreenIsLocked"] as? Bool ?? false
+        store.screensAwake = CGDisplayIsAsleep(CGMainDisplayID()) == 0 && !locked
+        NotificationCenter.default.addObserver(forName: NSWindow.didChangeOcclusionStateNotification, object: window, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.updateWindowVisible() }
+        }
+        let ws = NSWorkspace.shared.notificationCenter
+        for (name, awake) in [(NSWorkspace.screensDidSleepNotification, false), (NSWorkspace.screensDidWakeNotification, true),
+                              (NSWorkspace.sessionDidResignActiveNotification, false), (NSWorkspace.sessionDidBecomeActiveNotification, true)] {
+            ws.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.store.screensAwake = awake }
+            }
+        }
+    }
+
+    func updateWindowVisible() {
+        store.windowVisible = window.isVisible && window.occlusionState.contains(.visible)
+    }
+
+    func windowWillClose(_ notification: Notification) { store.windowVisible = false }
 
     // MARK: 主窗口
 

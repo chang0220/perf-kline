@@ -17,12 +17,20 @@ final class Store {
     let chip: String
     @ObservationIgnored let series: [String: Series]
 
-    /// 每采样一次加 1，界面靠它刷新。
+    /// 界面只靠它刷新：所有视图先读 revision，再读下面这些不被观察的数据。
+    /// 这样窗口看不见时只要不加 revision，界面就完全不重算、不重画（数据照常采集）。
     private(set) var revision = 0
-    private(set) var latest: [String: Double] = [:]
-    private(set) var rank: [ProcessRow] = []
-    private(set) var tape: [TapeEvent] = []
-    private(set) var lastSampleTime = Date().timeIntervalSince1970
+    @ObservationIgnored private(set) var latest: [String: Double] = [:]
+    @ObservationIgnored private(set) var rank: [ProcessRow] = []
+    @ObservationIgnored private(set) var tape: [TapeEvent] = []
+    @ObservationIgnored private(set) var lastSampleTime = Date().timeIntervalSince1970
+
+    /// 主窗口是否真的看得见（被挡住、最小化、关掉、熄屏时为 false）。
+    var windowVisible = true { didSet { if windowVisible && !oldValue { revision += 1 } } }
+    /// 屏幕是否亮着（熄屏 / 锁屏时菜单栏也不用刷新）。
+    @ObservationIgnored var screensAwake = true { didSet { if screensAwake && !oldValue { onChange?() } } }
+    /// 只给 --snapshot 用：离屏截图时窗口不可见也要刷新。
+    @ObservationIgnored var alwaysRender = false
     let startTime = Date().timeIntervalSince1970
 
     var selected: String { didSet { UserDefaults.standard.set(selected, forKey: "selected"); chartScrollBack = 0 } }
@@ -125,8 +133,8 @@ final class Store {
             tape.insert(contentsOf: events.reversed(), at: 0)
             if tape.count > 300 { tape.removeLast(tape.count - 300) }
         }
-        revision += 1
-        onChange?()
+        if windowVisible || alwaysRender { revision += 1 }
+        if screensAwake || alwaysRender { onChange?() }
     }
 
     // MARK: 读数
